@@ -28,12 +28,6 @@ const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
   const handleInputBlur = useCallback(() => {
     setIsFocused(false);
 
-    // if (inputRef.current?.value) {
-    //   setIsFilled(true);
-    // } else {
-    //   setIsFilled(false);
-    // }
-    // if/else acima, de forma simplificada com truthy/ falsy
     setIsFilled(!!inputRef.current?.value);
   }, []);
 
@@ -55,6 +49,7 @@ const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
         ref={inputRef}
         {...rest}
       />
+      {error}
     </Container>
   );
 };
