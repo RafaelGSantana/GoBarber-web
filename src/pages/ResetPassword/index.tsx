@@ -1,11 +1,10 @@
 import React, { useCallback, useRef } from 'react';
-import { FiLogIn, FiMail, FiLock } from 'react-icons/fi';
+import { FiLock } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
 import { Link, useHistory } from 'react-router-dom';
 
-import { useAuth } from '../../hooks/AuthContext';
 import { useToast } from '../../hooks/ToastContext';
 import getValidationErrors from '../../utils/getValidationErrors';
 
@@ -21,40 +20,35 @@ import {
   BackgroundImg,
 } from './styles';
 
-interface SignInFormData {
-  email: string;
+interface ResetPasswordFormData {
   password: string;
+  password_confirmation: string;
 }
 
-const SignIn: React.FC = () => {
+const ResetPassword: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
 
-  const { signIn } = useAuth();
   const { addToast } = useToast();
   const history = useHistory();
 
   const handleSubmit = useCallback(
-    async (data: SignInFormData) => {
+    async (data: ResetPasswordFormData) => {
       try {
         formRef.current?.setErrors({});
 
         const schema = Yup.object().shape({
-          email: Yup.string()
-            .required('E-mail obrigatório')
-            .email('Digite um e-mail válido'),
           password: Yup.string().required('A senha é obrigatória'),
+          password_confirmation: Yup.string().oneOf(
+            [Yup.ref('password'), null],
+            'A senha precisa ser a mesma nos dois campos',
+          ),
         });
 
         await schema.validate(data, {
           abortEarly: false,
         });
 
-        await signIn({
-          email: data.email,
-          password: data.password,
-        });
-
-        history.push('/dashboard');
+        history.push('/signin');
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err);
@@ -65,13 +59,13 @@ const SignIn: React.FC = () => {
         }
         addToast({
           type: 'error',
-          title: 'Erro na autenticação',
+          title: 'Erro no reset de senha',
           description:
-            'Não foi possível logar. Por favor, cheque as credenciais inseridas.',
+            'Ocorreu um erro ao resetar sua senha. Por favor, tente novamente.',
         });
       }
     },
-    [signIn, addToast, history],
+    [addToast, history],
   );
 
   return (
@@ -81,26 +75,24 @@ const SignIn: React.FC = () => {
           <img src={logoImg} alt="GoBarber" />
 
           <Form ref={formRef} onSubmit={handleSubmit}>
-            <h1>Faça seu logon</h1>
-
-            <Input name="email" icon={FiMail} placeholder="E-mail" />
+            <h1>Resetar sua senha</h1>
 
             <Input
               name="password"
               icon={FiLock}
               type="password"
-              placeholder="Senha"
+              placeholder="Nova senha"
             />
 
-            <Button type="submit">Entrar</Button>
+            <Input
+              name="password_confirmation"
+              icon={FiLock}
+              type="password"
+              placeholder="Confirme sua senha"
+            />
 
-            <Link to="forgot-password">Esqueci minha senha</Link>
+            <Button type="submit">Alterar senha</Button>
           </Form>
-
-          <Link to="/signup">
-            <FiLogIn />
-            Criar conta
-          </Link>
         </AnimationContainer>
       </Content>
       <BackgroundImg />
@@ -108,4 +100,4 @@ const SignIn: React.FC = () => {
   );
 };
 
-export default SignIn;
+export default ResetPassword;
