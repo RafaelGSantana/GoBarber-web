@@ -51,7 +51,6 @@ const Profile: React.FC = () => {
               then: Yup.string().required('Campo obrigatório'),
               otherwise: Yup.string(),
             })
-            .nullable()
             .oneOf([Yup.ref('password'), null], 'Confirmação incorreta'),
         });
 
